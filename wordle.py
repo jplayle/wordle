@@ -4,6 +4,7 @@ from english_words import english_words_set
 class wordle_solver():
 
 	def __init__(self):
+		self.a_to_z = [chr(x) for x in range(97, 123)]
 		self.words  = [word.lower() for word in english_words_set if len(word) == 5]
 		self.posns  = {}
 		self.chars  = []
@@ -11,12 +12,31 @@ class wordle_solver():
 		self.n_posn = 0
 		self.n_char = 0
 		
+		self.filter_punctuated_words()
+	
+	
+	def solve(self):
 		
-	def get_initial_guess(self):
+		print("Best initial guess: ", self.rank_guesses(), '\n')
+		
+		self.get_guess()
+		self.get_result()
+		
+		n = 1
+		while not self.get_next_guess() and n < 6:
+			n += 1
+			self.get_guess()
+			self.get_result()
+	
+	
+	def rank_guesses(self, guesses=[]):
 		
 		char_freq = {}
 		
-		for word in self.words:
+		if not guesses:
+			guesses = self.words
+		
+		for word in guesses:
 			for c in word:
 				if c not in char_freq:
 					char_freq[c] = 1
@@ -25,7 +45,7 @@ class wordle_solver():
 		
 		word_rank = {}
 					
-		for word in self.words:
+		for word in guesses:
 			skip = False
 			
 			for c in word:
@@ -44,10 +64,8 @@ class wordle_solver():
 				word_rank[freq_sum] += [word]
 				
 		sorted_fs = sorted([wr for wr in word_rank])
-		for fs in sorted_fs:
-			print(fs, word_rank[fs])
-			
-		return word_rank[sorted_fs[-1]]
+		
+		return word_rank[sorted_fs[-1]][0].upper()
 	
 	
 	def get_guess(self):
@@ -82,6 +100,9 @@ class wordle_solver():
 			elif r == '2' and i not in self.posns:
 				self.posns[i] = c
 				self.n_posn  += 1
+				if c in self.chars:
+					self.chars.remove(c)
+					self.n_char -= 1
 	
 	
 	def get_next_guess(self):
@@ -104,44 +125,43 @@ class wordle_solver():
 					remove = True
 					break
 					
-				if char in self.chars:
+				if word.count(char) == self.chars.count(char):
 					n_char += 1
 				
 				if i in self.posns:
 					if char == self.posns[i]:
 						n_posn += 1
 						
-			if n_posn != self.n_posn:
+			if n_posn != self.n_posn or n_char != self.n_char:
 				remove = True
 					
 			if not remove:
 				next_guesses += [word]
-				
-		chance = 100 / len(next_guesses)
+			
+		n_guesses = len(next_guesses)
+		
+		if n_guesses:
+			best_guess = self.rank_guesses(next_guesses)
+			chance     = 100 / n_guesses
+		else:
+			print("No more guesses.")
+			return 1
 
-		print("Next guess: ", next_guesses[0].upper(), ("(chance: %.1f%%)" % chance), '\n')
+		print("Next guess: ", best_guess, ("(chance: %.1f%%)" % chance), '\n')
 		
 		if chance == 100.0:
 			return 1
 		else:
 			return 0
-				
-				
-	def solve(self):
-		
-		print("Best initial guess: ", self.get_initial_guess(), '\n')
-		
-		self.get_guess()
-		self.get_result()
-		
-		n = 0
-		while not self.get_next_guess():
-			n += 1
-			if n == 5:
-				break
-			self.get_guess()
-			self.get_result()			
-				
+			
+			
+	def filter_punctuated_words(self):
+	
+		for word in self.words:
+			for c in word:
+				if c not in self.a_to_z:
+					self.words.remove(word)
+					break
 
 
 def main():
