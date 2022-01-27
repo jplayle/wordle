@@ -1,18 +1,20 @@
-from english_words import english_words_set
+"""
+WORDLE PUZZLE SOLVER
+Author: J. Playle
+Jan 2022
+"""
 
 
 class wordle_solver():
 
 	def __init__(self):
-		self.a_to_z = [chr(x) for x in range(97, 123)]
-		self.words  = [word.lower() for word in english_words_set if len(word) == 5]
+		self.get_words()
+		
 		self.posns  = {}
 		self.chars  = []
 		self.ignore = []
 		self.n_posn = 0
 		self.n_char = 0
-		
-		self.filter_punctuated_words()
 	
 	
 	def solve(self):
@@ -44,7 +46,7 @@ class wordle_solver():
 					char_freq[c] += 1
 		
 		word_rank = {}
-					
+		
 		for word in guesses:
 			skip = False
 			
@@ -155,13 +157,11 @@ class wordle_solver():
 			return 0
 			
 			
-	def filter_punctuated_words(self):
-	
-		for word in self.words:
-			for c in word:
-				if c not in self.a_to_z:
-					self.words.remove(word)
-					break
+	def get_words(self):
+		self.words = []
+		with open("words.txt", 'r') as f:
+			for word in f:
+				self.words += [word]
 
 
 def main():
