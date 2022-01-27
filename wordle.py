@@ -9,7 +9,7 @@ class wordle_solver():
 
 	def __init__(self):
 		self.get_words()
-		print(self.words)
+		
 		self.posns  = {}
 		self.chars  = []
 		self.ignore = []
@@ -31,7 +31,7 @@ class wordle_solver():
 			self.get_result()
 	
 	
-	def rank_guesses(self, guesses=[]):
+	def rank_guesses(self, guesses=[], single_chars=True):
 		
 		char_freq = {}
 		
@@ -55,7 +55,7 @@ class wordle_solver():
 					skip = True
 					break
 					
-			if skip:
+			if skip and single_chars:
 				continue
 			
 			freq_sum = sum([char_freq[char] for char in word])
@@ -66,6 +66,9 @@ class wordle_solver():
 				word_rank[freq_sum] += [word]
 				
 		sorted_fs = sorted([wr for wr in word_rank])
+		
+		if not sorted_fs:
+			return self.rank_guesses(guesses, single_chars=False)
 		
 		return word_rank[sorted_fs[-1]][0].upper()
 	
