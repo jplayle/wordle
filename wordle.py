@@ -9,7 +9,7 @@ class wordle_solver():
 
 	def __init__(self):
 		self.get_words()
-		
+		print(self.words)
 		self.posns  = {}
 		self.chars  = []
 		self.ignore = []
@@ -161,7 +161,7 @@ class wordle_solver():
 		self.words = []
 		with open("words.txt", 'r') as f:
 			for word in f:
-				self.words += [word]
+				self.words += [word.replace('\n', '')]
 
 
 def main():
